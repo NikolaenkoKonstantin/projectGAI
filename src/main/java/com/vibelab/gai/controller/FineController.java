@@ -27,8 +27,9 @@ public class FineController {
 
 
     @GetMapping("/fines")
-    public List<Fine> fines(){
-        return serviceFine.fines();
+    public List<Fine> fines(@RequestParam(value = "page", required = false) Integer page,
+                            @RequestParam(value = "size", required = false) Integer size){
+        return serviceFine.fines(page, size);
     }
 
 
