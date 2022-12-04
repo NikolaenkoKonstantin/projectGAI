@@ -1,9 +1,12 @@
 package com.vibelab.gai.model;
 
+import jakarta.persistence.*;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.*;
+import org.hibernate.validator.constraints.UniqueElements;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -13,23 +16,37 @@ import java.util.Objects;
 @Getter
 @Setter
 @NoArgsConstructor
+@Entity
+@Table(name = "fine")
 public class Fine {
+    @Id
+    @Column(name = "id_fine")
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int idFine;
+    @Column(name = "number_of_car")
     @NotEmpty(message = "number of car should not be empty")
     @Size(min = 17, max = 17, message = "number of car should be 17 characters")
     private String numberOfCar;
+    @Column(name = "intruder")
     @NotEmpty(message = "intruder should not be empty")
     @Size(min = 5, max = 50, message = "intruder should be between 5 and 50 characters")
     private String intruder;
+    @Column(name = "traffic_cop")
     @NotEmpty(message = "traffic cop should not be empty")
     @Size(min = 5, max = 50, message = "traffic cop should be between 5 and 50 characters")
     private String trafficCop;
+    @Column(name = "date_fine")
     private LocalDate dateFine;
+    @Column(name = "time_fine")
     private LocalTime timeFine;
+    @Column(name = "sum")
     @Min(value = 0, message = "sum should be greater than 0")
     private int sum;
+    @Column(name = "agenda")
     private boolean agenda;
+    @Column(name = "paid")
     private boolean paid;
+    @Column(name = "date_deadline")
     private LocalDate dateDeadline;
 
     public Fine(int idFine, String numberOfCar, String intruder, String trafficCop, String dateFine,

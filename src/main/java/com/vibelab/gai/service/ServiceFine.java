@@ -1,59 +1,67 @@
 package com.vibelab.gai.service;
 
-import com.vibelab.gai.dao.FineDAO;
 import com.vibelab.gai.model.Fine;
+import com.vibelab.gai.repository.FineRepository;
 import com.vibelab.gai.util.FineNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
 
 @Service
+@Transactional(readOnly = true)
 public class ServiceFine {
-    private final FineDAO fineDAO;
+    private final FineRepository fineRepository;
 
     @Autowired
-    public ServiceFine(FineDAO fineDAO) {
-        this.fineDAO = fineDAO;
+    public ServiceFine(FineRepository fineRepository) {
+        this.fineRepository = fineRepository;
     }
 
 
     public List<Fine> fines(){
-        return fineDAO.fines();
+        return fineRepository.findAll();
     }
 
 
+    @Transactional
     public void addFine(Fine fine){
-        fineDAO.addFine(fine);
+        fineRepository.save(fine);
     }
 
 
+    @Transactional
     public void updateFine(Fine fine){
-        if(!fineDAO.updateFine(fine))
-            throw new FineNotFoundException();
+        fineRepository.save(fine);
     }
 
 
+    @Transactional
     public void deleteFine(Fine fine){
-        fineDAO.deleteFine(fine);
+        fineRepository.delete(fine);
     }
 
 
     public Fine showFineId(int id){
-        Optional<Fine> fine = fineDAO.showFineId(id);
+        Optional<Fine> fine = fineRepository.findById(id);
         return fine.orElseThrow(FineNotFoundException::new);
     }
 
 
+    @Transactional
     public void payFine(int id){
-        if(!fineDAO.payFine(id))
-            throw new FineNotFoundException();
+        Fine fine = showFineId(id);
+        fine.setPaid(true);
+        fineRepository.save(fine);
     }
 
 
+    @Transactional
     public void sendAgenda(int id){
-        if(!fineDAO.sendAgenda(id))
-            throw new FineNotFoundException();
+        Fine fine = showFineId(id);
+        fine.setAgenda(true);
+        fineRepository.save(fine);
     }
 }
