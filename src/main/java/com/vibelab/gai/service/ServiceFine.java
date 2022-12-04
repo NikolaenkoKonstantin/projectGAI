@@ -5,6 +5,7 @@ import com.vibelab.gai.repository.FineRepository;
 import com.vibelab.gai.util.FineNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -27,6 +28,13 @@ public class ServiceFine {
             return fineRepository.findAll();
         else
             return fineRepository.findAll(PageRequest.of(page, size)).getContent();
+    }
+
+    public List<Fine> sortFines(Integer page, Integer size, String sort){
+        if(page == null || size == null || size == 0)
+            return fineRepository.findAll(Sort.by(sort));
+        else
+            return fineRepository.findAll(PageRequest.of(page, size, Sort.by(sort))).getContent();
     }
 
 

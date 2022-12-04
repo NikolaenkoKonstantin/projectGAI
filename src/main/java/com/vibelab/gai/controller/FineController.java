@@ -28,8 +28,12 @@ public class FineController {
 
     @GetMapping("/fines")
     public List<Fine> fines(@RequestParam(value = "page", required = false) Integer page,
-                            @RequestParam(value = "size", required = false) Integer size){
-        return serviceFine.fines(page, size);
+                            @RequestParam(value = "size", required = false) Integer size,
+                            @RequestParam(value = "sort", required = false) String sort){
+        if(sort == null)
+            return serviceFine.fines(page, size);
+        else
+            return serviceFine.sortFines(page, size, sort);
     }
 
 
