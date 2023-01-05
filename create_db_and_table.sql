@@ -10,5 +10,6 @@ CREATE TABLE fine(
                      sum int check(sum >= 0),
                      subpoena bool default false,
                      paid bool default false,
-                     date_deadline date not null
+                     date_deadline date not null,
+                     overdue bool default false
 );

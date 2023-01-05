@@ -47,4 +47,7 @@ public class Fine {
     @Column(name = "date_deadline")
     private LocalDate dateDeadline;
 
+    @Column(name = "overdue")
+    private boolean overdue;
+
 }
