@@ -9,7 +9,7 @@ import java.util.List;
 @Component
 public class Validation {
 
-    public static void throwFineBadRequestException(BindingResult bindingResult){
+    public void throwFineBadRequestException(BindingResult bindingResult){
         if(bindingResult.hasErrors()){
             StringBuilder errorMsg = new StringBuilder();
             List<FieldError> errors = bindingResult.getFieldErrors();

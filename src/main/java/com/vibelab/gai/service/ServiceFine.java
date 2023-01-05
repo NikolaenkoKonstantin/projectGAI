@@ -3,69 +3,86 @@ package com.vibelab.gai.service;
 import com.vibelab.gai.model.Fine;
 import com.vibelab.gai.repository.FineRepository;
 import com.vibelab.gai.util.FineNotFoundException;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
 
+@RequiredArgsConstructor
 @Service
 @Transactional(readOnly = true)
 public class ServiceFine {
     private final FineRepository fineRepository;
 
-    @Autowired
-    public ServiceFine(FineRepository fineRepository) {
-        this.fineRepository = fineRepository;
-    }
 
-
-    public List<Fine> fines(Integer page, Integer size){
-        if(page == null || size == null || size == 0)
-            return fineRepository.findAll();
-        else
-            return fineRepository.findAll(PageRequest.of(page, size)).getContent();
+    public Page<Fine> fines(Integer page, Integer size, String sort){
+        return fineRepository.findAll(PageRequest.of(page, size, Sort.by(sort)));
     }
 
 
     @Transactional
-    public void addFine(Fine fine){
-        fineRepository.save(fine);
+    public Fine addFine(Fine fine){
+        enrichFine(fine);
+        return fineRepository.save(fine);
+    }
+
+    private void enrichFine(Fine fine){
+        fine.setDateFine(LocalDate.now());
+        fine.setTimeFine(LocalTime.now());
+        fine.setDateDeadline(LocalDate.now());
+    }
+
+
+    private Fine updateFineDTO(Fine updateFine, int id){
+        Fine fine = getFineById(id);
+        fine.setNumberOfCar(updateFine.getNumberOfCar());
+        fine.setIntruder(updateFine.getIntruder());
+        fine.setTrafficCop(updateFine.getTrafficCop());
+        fine.setSum(updateFine.getSum());
+        fine.setSubpoena(updateFine.isSubpoena());
+        fine.setPaid(updateFine.isPaid());
+
+        return fine;
+    }
+
+    @Transactional
+    public Fine updateFine(Fine updateFine, int id){
+        return fineRepository.save(updateFineDTO(updateFine, id));
     }
 
 
     @Transactional
-    public void updateFine(Fine fine){
-        fineRepository.save(fine);
+    public void deleteFine(int id){
+        fineRepository.deleteById(id);
     }
 
 
-    @Transactional
-    public void deleteFine(Fine fine){
-        fineRepository.delete(fine);
-    }
-
-
-    public Fine showFineId(int id){
+    public Fine getFineById(int id){
         Optional<Fine> fine = fineRepository.findById(id);
         return fine.orElseThrow(FineNotFoundException::new);
     }
 
 
     @Transactional
-    public void payFine(int id){
-        Fine fine = showFineId(id);
+    public Fine payFine(int id){
+        Fine fine = getFineById(id);
         fine.setPaid(true);
-        fineRepository.save(fine);
+        return fineRepository.save(fine);
     }
 
 
     @Transactional
-    public void sendAgenda(int id){
-        Fine fine = showFineId(id);
-        fine.setAgenda(true);
-        fineRepository.save(fine);
+    public Fine sendSubpoena(int id){
+        Fine fine = getFineById(id);
+        fine.setSubpoena(true);
+        return fineRepository.save(fine);
     }
 }

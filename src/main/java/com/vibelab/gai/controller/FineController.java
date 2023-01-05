@@ -1,12 +1,14 @@
 package com.vibelab.gai.controller;
 
+import com.vibelab.gai.dto.FineDTO;
+import com.vibelab.gai.dto.ResponseFineDTO;
 import com.vibelab.gai.model.Fine;
 import com.vibelab.gai.service.ServiceFine;
-import com.vibelab.gai.util.FineErrorResponse;
-import com.vibelab.gai.util.FineBadRequestException;
-import com.vibelab.gai.util.FineNotFoundException;
+import com.vibelab.gai.util.*;
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
@@ -16,99 +18,72 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/v1")
+@RequiredArgsConstructor
+@RequestMapping("/api/v1/fines")
 public class FineController {
     private final ServiceFine serviceFine;
+    private final Converter fineConverter;
+    private final Validation validation;
 
-    @Autowired
-    public FineController(ServiceFine serviceFine) {
-        this.serviceFine = serviceFine;
+
+    @GetMapping
+    public Page<ResponseFineDTO> fines(@RequestParam(value = "page", defaultValue = "0") Integer page,
+                                       @RequestParam(value = "size", defaultValue = "10") Integer size,
+                                       @RequestParam(value = "sort", defaultValue = "idFine") String sort){
+        return serviceFine.fines(page, size, sort).map(fineConverter::convertToResponseFineDTO);
     }
 
 
-    @GetMapping("/fines")
-    public List<Fine> fines(@RequestParam(value = "page", required = false) Integer page,
-                            @RequestParam(value = "size", required = false) Integer size){
-        return serviceFine.fines(page, size);
-    }
+    @PostMapping
+    public ResponseFineDTO addFine(@RequestBody @Valid FineDTO fineDTO, BindingResult bindingResult){
+        validation.throwFineBadRequestException(bindingResult);
 
-
-    @PostMapping("/fines")
-    public ResponseEntity<HttpStatus> addFine(@RequestBody @Valid Fine fine, BindingResult bindingResult){
-        if(bindingResult.hasErrors()){
-            StringBuilder errorMsg = new StringBuilder();
-            List<FieldError> errors = bindingResult.getFieldErrors();
-
-            for(FieldError error : errors)
-                errorMsg.append(error.getField())
-                        .append(" - ")
-                        .append(error.getDefaultMessage())
-                        .append(";");
-
-            throw new FineBadRequestException(errorMsg.toString());
-        }
-
-        serviceFine.addFine(fine);
-        return ResponseEntity.ok(HttpStatus.OK);
+        return fineConverter.convertToResponseFineDTO(serviceFine.addFine(fineConverter.convertToFine(fineDTO)));
     }
 
 
     @ExceptionHandler
     private ResponseEntity<FineErrorResponse> handleException(FineBadRequestException ex){
-        FineErrorResponse response = new FineErrorResponse(ex.getMessage(), System.currentTimeMillis());
-        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+        return new HandlerException().handleException(ex);
     }
 
 
-    @PutMapping("/fines")
-    public ResponseEntity<HttpStatus> updateFine(@RequestBody @Valid Fine fine, BindingResult bindingResult){
-        if(bindingResult.hasErrors()){
-            StringBuilder errorMsg = new StringBuilder();
-            List<FieldError> errors = bindingResult.getFieldErrors();
+    @PutMapping("/{id}")
+    public ResponseFineDTO updateFine(@RequestBody @Valid FineDTO fineDTO,
+                                      @PathVariable("id") int id, BindingResult bindingResult){
+        validation.throwFineBadRequestException(bindingResult);
 
-            for(FieldError error : errors)
-                errorMsg.append(error.getField())
-                        .append(" - ")
-                        .append(error.getDefaultMessage())
-                        .append(";");
-
-            throw new FineBadRequestException(errorMsg.toString());
-        }
-        serviceFine.updateFine(fine);
-        return ResponseEntity.ok(HttpStatus.OK);
+        return fineConverter.convertToResponseFineDTO(serviceFine.updateFine(fineConverter.convertToFine(fineDTO), id));
     }
 
 
-    @DeleteMapping("/fines")
-    public ResponseEntity<HttpStatus> deleteFine(@RequestBody Fine fine){
-        serviceFine.deleteFine(fine);
-        return ResponseEntity.ok(HttpStatus.OK);
+    @DeleteMapping("/{id}")
+    public ResponseEntity<HttpStatus> deleteFine(@PathVariable("id") int id){
+        serviceFine.deleteFine(id);
+        return ResponseEntity.ok(HttpStatus.NO_CONTENT);
     }
 
 
-    @GetMapping("/fines/{id}")
-    public Fine showFineId(@PathVariable("id") int id){
-        return serviceFine.showFineId(id);
+    @GetMapping("/{id}")
+    public ResponseFineDTO getFineById(@PathVariable("id") int id){
+        return fineConverter.convertToResponseFineDTO(serviceFine.getFineById(id));
     }
 
 
     @ExceptionHandler
     private ResponseEntity<FineErrorResponse> handleException(FineNotFoundException ex){
-        FineErrorResponse response = new FineErrorResponse("Fine with this id wasn't found", System.currentTimeMillis());
-        return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
+        return new HandlerException().handleException(ex);
     }
 
 
-    @PatchMapping("/fines/{id}/pay")
-    public ResponseEntity<HttpStatus> payFine(@PathVariable("id") int id){
-        serviceFine.payFine(id);
-        return ResponseEntity.ok(HttpStatus.OK);
+    @PatchMapping("/{id}/pay")
+    public ResponseFineDTO payFine(@PathVariable("id") int id){
+        return fineConverter.convertToResponseFineDTO(serviceFine.payFine(id));
     }
 
 
-    @PatchMapping("/fines/{id}/court")
-    public ResponseEntity<HttpStatus> sendAgenda(@PathVariable("id") int id){
-        serviceFine.sendAgenda(id);
-        return ResponseEntity.ok(HttpStatus.OK);
+    @PatchMapping("/{id}/court")
+    public ResponseFineDTO sendSubpoena(@PathVariable("id") int id){
+        return fineConverter.convertToResponseFineDTO(serviceFine.sendSubpoena(id));
     }
 }
