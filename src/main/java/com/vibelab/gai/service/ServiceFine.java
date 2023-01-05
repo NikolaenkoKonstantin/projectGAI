@@ -1,5 +1,6 @@
 package com.vibelab.gai.service;
 
+import com.vibelab.gai.dto.FineDTO;
 import com.vibelab.gai.model.Fine;
 import com.vibelab.gai.repository.FineRepository;
 import com.vibelab.gai.util.FineNotFoundException;
@@ -41,18 +42,22 @@ public class ServiceFine {
     }
 
 
-    private Fine updateFineDTO(Fine updateFine, int id){
+    private Fine updateFineDTO(FineDTO fineDTO, int id){
         Fine fine = getFineById(id);
-        updateFine.setIdFine(id);
-        updateFine.setDateTimeFine(fine.getDateTimeFine());
-        updateFine.setDateDeadline(fine.getDateDeadline());
 
-        return updateFine;
+        fine.setNumberOfCar(fineDTO.getNumberOfCar());
+        fine.setIntruder(fineDTO.getIntruder());
+        fine.setTrafficCop(fineDTO.getTrafficCop());
+        fine.setSum(fineDTO.getSum());
+        fine.setSubpoena(fineDTO.isSubpoena());
+        fine.setPaid(fineDTO.isPaid());
+
+        return fine;
     }
 
     @Transactional
-    public Fine updateFine(Fine updateFine, int id){
-        return fineRepository.save(updateFineDTO(updateFine, id));
+    public Fine updateFine(FineDTO fineDTO, int id){
+        return fineRepository.save(updateFineDTO(fineDTO, id));
     }
 
 

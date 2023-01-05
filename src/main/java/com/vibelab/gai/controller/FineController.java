@@ -53,7 +53,7 @@ public class FineController {
                                       @PathVariable("id") int id, BindingResult bindingResult){
         validation.throwFineBadRequestException(bindingResult);
 
-        return fineConverter.convertToResponseFineDTO(serviceFine.updateFine(fineConverter.convertToFine(fineDTO), id));
+        return fineConverter.convertToResponseFineDTO(serviceFine.updateFine(fineDTO, id));
     }
 
 
