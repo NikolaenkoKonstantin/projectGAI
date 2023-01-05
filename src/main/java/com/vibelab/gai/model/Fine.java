@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 
 @EqualsAndHashCode
@@ -28,16 +29,16 @@ public class Fine {
     @Column(name = "traffic_cop")
     private String trafficCop;
 
-    @Column(name = "date_fine")
-    private LocalDate dateFine;
+    @Column(name = "date_time_fine")
+    private LocalDateTime dateTimeFine;
 
-    @Column(name = "time_fine")
-    private LocalTime timeFine;
+    @Column(name = "date_payment")
+    private LocalDate datePayment;
 
     @Column(name = "sum")
     private int sum;
 
-    @Column(name = "agenda")
+    @Column(name = "subpoena")
     private boolean subpoena;
 
     @Column(name = "paid")

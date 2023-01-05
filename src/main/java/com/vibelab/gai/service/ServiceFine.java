@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
@@ -35,22 +36,18 @@ public class ServiceFine {
     }
 
     private void enrichFine(Fine fine){
-        fine.setDateFine(LocalDate.now());
-        fine.setTimeFine(LocalTime.now());
-        fine.setDateDeadline(LocalDate.now());
+        fine.setDateTimeFine(LocalDateTime.now());
+        fine.setDateDeadline(LocalDate.now().plusMonths(1));
     }
 
 
     private Fine updateFineDTO(Fine updateFine, int id){
         Fine fine = getFineById(id);
-        fine.setNumberOfCar(updateFine.getNumberOfCar());
-        fine.setIntruder(updateFine.getIntruder());
-        fine.setTrafficCop(updateFine.getTrafficCop());
-        fine.setSum(updateFine.getSum());
-        fine.setSubpoena(updateFine.isSubpoena());
-        fine.setPaid(updateFine.isPaid());
+        updateFine.setIdFine(id);
+        updateFine.setDateTimeFine(fine.getDateTimeFine());
+        updateFine.setDateDeadline(fine.getDateDeadline());
 
-        return fine;
+        return updateFine;
     }
 
     @Transactional
@@ -75,6 +72,7 @@ public class ServiceFine {
     public Fine payFine(int id){
         Fine fine = getFineById(id);
         fine.setPaid(true);
+        fine.setDatePayment(LocalDate.now());
         return fineRepository.save(fine);
     }
 
