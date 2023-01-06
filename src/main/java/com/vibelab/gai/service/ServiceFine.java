@@ -50,7 +50,6 @@ public class ServiceFine {
         fine.setTrafficCop(fineDTO.getTrafficCop());
         fine.setSum(fineDTO.getSum());
         fine.setSubpoena(fineDTO.isSubpoena());
-        fine.setPaid(fineDTO.isPaid());
 
         return fine;
     }

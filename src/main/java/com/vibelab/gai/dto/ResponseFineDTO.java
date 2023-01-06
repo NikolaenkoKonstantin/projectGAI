@@ -24,4 +24,6 @@ public class ResponseFineDTO {
     private boolean subpoena;
 
     private boolean paid;
+
+    private boolean overdue;
 }

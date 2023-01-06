@@ -31,6 +31,4 @@ public class FineDTO {
     private int sum;
 
     private boolean subpoena;
-
-    private boolean paid;
 }
